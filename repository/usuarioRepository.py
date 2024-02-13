@@ -2,12 +2,13 @@ from typing import List, Dict, Any
 
 from db import acessando_base
 from models.usuario import *
-from utils import converteDictEmJsonAll
+from utils import converteDictEmJsonAll, validaToken
 from flask_bcrypt import generate_password_hash, check_password_hash
 
-import json, bcrypt
+import json, base64
 
 def findAllUsuarios() -> list[dict[Any, Any]]:
+
     con = acessando_base() # faz a conexao com o banco
     # query = "SELECT * FROM usuario;" # faz monta q query
     query = '''
@@ -167,9 +168,14 @@ def loginUsuario(usuario: Usuario) -> Usuario|str:
 
             isSenha = check_password_hash(isUsuario['senha'], usuario['senha'])
 
-            print('isSenha: ', isSenha)
-
             if isSenha:
+                token = '{}:{}'.format(isUsuario['username'], isUsuario['senha'])
+
+                b = bytes(token, 'utf-8')
+                encoded = base64.b64encode(b).decode("utf-8")
+
+                isUsuario['token'] = encoded
+
                 return isUsuario
 
             else:

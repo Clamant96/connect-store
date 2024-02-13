@@ -2,18 +2,33 @@ from connectStore import app
 from repository.usuarioRepository import *
 from models.usuario import *
 from flask import jsonify, request, session
+from utils import validaToken
 
 @app.route('/usuario/', methods=['GET'])
 def getAllUsuarios():
-    usuarios = findAllUsuarios()
+    data = request.headers.get('Authorization')
 
-    return jsonify(usuarios)
+    if data:
+
+        if validaToken(data):
+            return jsonify(findAllUsuarios())
+
+        return None
+
+    return 'Acesso nao autorizado'
 
 @app.route('/usuario/<int:id>', methods=['GET'])
 def getByIdUsuario(id: int):
-    usuario = findByIdUsuario(id)
+    data = request.headers.get('Authorization')
 
-    return jsonify(usuario)
+    if data:
+
+        if validaToken(data):
+            return jsonify(findByIdUsuario(id))
+
+        return None
+
+    return 'Acesso nao autorizado'
 
 @app.route('/usuario/criar-usuario', methods=['POST'])
 def criarUsuario():
@@ -24,12 +39,29 @@ def criarUsuario():
 @app.route('/usuario/atualizar-usuario', methods=['PUT'])
 def atualizarUsuario():
     data = request.get_json(silent=True)
+    token = request.headers.get('Authorization')
 
-    return putUsuario(data)
+    if token:
+
+        if validaToken(token):
+            return putUsuario(data)
+
+        return None
+
+    return 'Acesso nao autorizado'
 
 @app.route('/usuario/deletar-usuario/<int:id>', methods=['DELETE'])
 def deletarUsuario(id):
-    return deleteByIdUsuario(id)
+    token = request.headers.get('Authorization')
+
+    if token:
+
+        if validaToken(token):
+            return deleteByIdUsuario(id)
+
+        return None
+
+    return 'Acesso nao autorizado'
 
 @app.route('/usuario/login', methods=['POST'])
 def login():

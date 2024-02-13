@@ -7,3 +7,4 @@ class Usuario(BaseModel):
     username: str
     email: str
     senha: str
+    token: str
