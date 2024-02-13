@@ -2,24 +2,26 @@ from typing import List, Dict, Any
 
 from db import acessando_base
 from models.usuario import *
+from utils import converteDictEmJsonAll
 
-def converteDictEmJsonAll(cursor):
-    lista = cursor.fetchall()
-
-    if lista:
-        return [dict(dict_factory(cursor, row)) for row in lista]
-    else:
-        return []
-
-def dict_factory(cursor, row):
-    d = {}
-    for idx,col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+import json
 
 def findAllUsuarios() -> list[dict[Any, Any]]:
     con = acessando_base() # faz a conexao com o banco
-    query = "SELECT * FROM usuario;" # faz monta q query
+    # query = "SELECT * FROM usuario;" # faz monta q query
+    query = '''
+        SELECT
+          JSON_PRETTY(
+              JSON_ARRAYAGG(JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email, 'consoles', s.consoles))) AS usuarios 
+            FROM
+                connect_store.usuario u
+            left join (
+                SELECT usuario_id, 
+                    JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome)) AS consoles 
+                FROM 
+                    connect_store.console c 
+            GROUP BY c.usuario_id) s ON s.usuario_id = u.id;
+    '''
     cursor = con.cursor()
     cursor.execute(query)
 
@@ -29,11 +31,27 @@ def findAllUsuarios() -> list[dict[Any, Any]]:
         con.close()
         cursor.close()
 
-    return result
+    if result[0]['usuarios'] != None:
+        return json.loads(result[0]['usuarios']) # retorna somente o objeto JSON
+    else:
+        return None
 
 def findByIdUsuario(id: int) -> Usuario|None:
     con = acessando_base() # faz a conexao com o banco
-    query = "SELECT * FROM usuario WHERE id = {}".format(id)  # faz monta q query
+    # query = "SELECT * FROM usuario WHERE id = {}".format(id)  # faz monta q query
+    query = '''SELECT
+                  JSON_PRETTY(
+                      JSON_ARRAYAGG(JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email, 'consoles', s.consoles))) AS usuarios 
+                    FROM
+                        connect_store.usuario u
+                    left join (
+                        SELECT usuario_id, 
+                            JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome)) AS consoles 
+                        FROM 
+                            connect_store.console c 
+                    GROUP BY c.usuario_id) s ON s.usuario_id = u.id 
+                    WHERE u.id = {};
+    '''.format(id)
     cursor = con.cursor()
     cursor.execute(query) # faz a busca no banco
 
@@ -43,8 +61,8 @@ def findByIdUsuario(id: int) -> Usuario|None:
         con.close()
         cursor.close()
 
-    if result:
-        return result[0]
+    if result[0]['usuarios'] != None:
+        return json.loads(result[0]['usuarios'])[0]  # retorna somente o objeto JSON
     else:
         return None
 

@@ -4,6 +4,8 @@ app = Flask(__name__) # inicializa o Flask e associa o projeto atual a ele
 app.config.from_pyfile('config.py') # referencia o arquivo de conexao e o proprio python consegue buscar as variaveis do arquivo automaticamente
 
 from controller.usuarioController import *
+from controller.consoleController import *
+from controller.categoriaController import *
 
 # define esse arquivo como sendo a main do projeto
 if __name__ == '__main__':
