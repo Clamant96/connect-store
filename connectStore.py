@@ -1,7 +1,10 @@
 from flask import Flask
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__) # inicializa o Flask e associa o projeto atual a ele
 app.config.from_pyfile('config.py') # referencia o arquivo de conexao e o proprio python consegue buscar as variaveis do arquivo automaticamente
+
+bcrypt = Bcrypt(app) # habilita a funcao de hash em senhas
 
 from controller.usuarioController import *
 from controller.consoleController import *

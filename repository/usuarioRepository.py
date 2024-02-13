@@ -3,8 +3,9 @@ from typing import List, Dict, Any
 from db import acessando_base
 from models.usuario import *
 from utils import converteDictEmJsonAll
+from flask_bcrypt import generate_password_hash, check_password_hash
 
-import json
+import json, bcrypt
 
 def findAllUsuarios() -> list[dict[Any, Any]]:
     con = acessando_base() # faz a conexao com o banco
@@ -41,7 +42,7 @@ def findByIdUsuario(id: int) -> Usuario|None:
     # query = "SELECT * FROM usuario WHERE id = {}".format(id)  # faz monta q query
     query = '''SELECT
                   JSON_PRETTY(
-                      JSON_ARRAYAGG(JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email, 'consoles', s.consoles))) AS usuarios 
+                      JSON_ARRAYAGG(JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email, 'senha', u.senha, 'consoles', s.consoles))) AS usuarios 
                     FROM
                         connect_store.usuario u
                     left join (
@@ -69,7 +70,20 @@ def findByIdUsuario(id: int) -> Usuario|None:
 def findByUsernameUsuario(username: str) -> Usuario|None:
 
     con = acessando_base() # faz a conexao com o banco
-    query = "SELECT * FROM usuario WHERE username = '{}'".format(username)  # faz monta q query
+    # query = "SELECT * FROM usuario WHERE username = '{}'".format(username)  # faz monta q query
+    query = '''SELECT
+                  JSON_PRETTY(
+                      JSON_ARRAYAGG(JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email, 'senha', u.senha, 'consoles', s.consoles))) AS usuarios 
+                    FROM
+                        connect_store.usuario u
+                    left join (
+                        SELECT usuario_id, 
+                            JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome)) AS consoles 
+                        FROM 
+                            connect_store.console c 
+                    GROUP BY c.usuario_id) s ON s.usuario_id = u.id 
+                    WHERE username = '{}';
+    '''.format(username)
     cursor = con.cursor()
     cursor.execute(query) # faz a busca no banco
 
@@ -79,14 +93,17 @@ def findByUsernameUsuario(username: str) -> Usuario|None:
         con.close()
         cursor.close()
 
-    if result:
-        return result[0]
+    if result[0]['usuarios'] != None:
+        return json.loads(result[0]['usuarios'])[0]  # retorna somente o objeto JSON
     else:
         return None
 
 def postUsuario(usuario: Usuario) -> str:
 
     if findByUsernameUsuario(usuario['username']) == None:
+
+        usuario['senha'] = generate_password_hash(usuario['senha']).decode('utf-8')
+
         con = acessando_base() # faz a conexao com o banco
         query = "INSERT INTO usuario (nome, username, email, senha) VALUES ('{}', '{}', '{}', '{}');".format(usuario['nome'], usuario['username'], usuario['email'], usuario['senha'])  # faz monta q query
         cursor = con.cursor()
@@ -104,6 +121,10 @@ def postUsuario(usuario: Usuario) -> str:
 def putUsuario(usuario: Usuario) -> str:
 
     if findByIdUsuario(usuario['id']) != None:
+
+        # se a nova senha informada for diferente da atual cadastrada, atualiza ela na base
+        usuario['senha'] = generate_password_hash(usuario['senha']).decode('utf-8')
+
         con = acessando_base() # faz a conexao com o banco
         query = "UPDATE usuario SET nome = '{}', username = '{}', email = '{}', senha = '{}' WHERE id = {};".format(usuario['nome'], usuario['username'], usuario['email'], usuario['senha'], usuario['id'])  # faz monta q query
         cursor = con.cursor()
@@ -136,24 +157,24 @@ def deleteByIdUsuario(id: int) -> str:
 
     return 'Nao foi possivel excluir o usuario da base, pois ele nao foi localizado.'
 
-def loginUsuario(usuario: Usuario):
+def loginUsuario(usuario: Usuario) -> Usuario|str:
 
     if usuario['username'] != '' and usuario['senha'] != '':
 
-        con = acessando_base()  # faz a conexao com o banco
-        query = "SELECT * FROM usuario WHERE username = '{}' and senha = '{}'".format(usuario['username'], usuario['senha'])  # faz monta q query
-        cursor = con.cursor()
-        cursor.execute(query)  # faz a busca no banco
+        isUsuario = findByUsernameUsuario(usuario['username'])
 
-        result = converteDictEmJsonAll(cursor)  # faz a busca no banco e formata o retorno e retorna somente 1 dado
+        if isUsuario:
 
-        if con.is_connected():
-            con.close()
-            cursor.close()
+            isSenha = check_password_hash(isUsuario['senha'], usuario['senha'])
 
-        if result:
-            return result[0]
+            print('isSenha: ', isSenha)
+
+            if isSenha:
+                return isUsuario
+
+            else:
+                return 'Usuario invalido'
         else:
-            return None
-
-    return None
+            return 'Usuario invalido'
+    else:
+        return 'Usuario invalido'
