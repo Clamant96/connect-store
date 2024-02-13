@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from models.usuario import Usuario
 
 class Console(BaseModel):
     id: int

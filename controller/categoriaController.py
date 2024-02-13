@@ -4,15 +4,15 @@ from flask import jsonify, request
 
 @app.route('/categoria/', methods=['GET'])
 def getAllCategoria():
-    consoles = findAllCategoria()
+    categorias = findAllCategoria()
 
-    return jsonify(consoles)
+    return jsonify(categorias)
 
 @app.route('/categoria/<int:id>', methods=['GET'])
 def getByIdCategoria(id: int):
-    console = findByIdCategoria(id)
+    categoria = findByIdCategoria(id)
 
-    return jsonify(console)
+    return jsonify(categoria)
 
 @app.route('/categoria/criar-categoria', methods=['POST'])
 def criarCategoria():

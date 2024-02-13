@@ -6,6 +6,7 @@ app.config.from_pyfile('config.py') # referencia o arquivo de conexao e o propri
 from controller.usuarioController import *
 from controller.consoleController import *
 from controller.categoriaController import *
+from controller.jogoController import *
 
 # define esse arquivo como sendo a main do projeto
 if __name__ == '__main__':
