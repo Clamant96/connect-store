@@ -29,6 +29,32 @@ def getByIdCategoria(id: int):
 
     return 'Acesso nao autorizado'
 
+@app.route('/categoria/all-jogos-categoria', methods=['GET'])
+def getAllJogosCategoria():
+    data = request.headers.get('Authorization')
+
+    if data:
+
+        if validaToken(data):
+            return jsonify(findAllJogosEConsolesCategoria())
+
+        return None
+
+    return 'Acesso nao autorizado'
+
+@app.route('/categoria/all-jogos-categoria/<int:id>', methods=['GET'])
+def getAllJogosCategoriaById(id: int):
+    data = request.headers.get('Authorization')
+
+    if data:
+
+        if validaToken(data):
+            return jsonify(findAllJogosCategoriaById(id))
+
+        return None
+
+    return 'Acesso nao autorizado'
+
 @app.route('/categoria/criar-categoria', methods=['POST'])
 def criarCategoria():
     data = request.get_json(silent=True)
@@ -67,6 +93,19 @@ def deletarCategoria(id):
 
         if validaToken(token):
             return deleteByIdCategoria(id)
+
+        return None
+
+    return 'Acesso nao autorizado'
+
+@app.route('/categoria/associa-dados/categoria-id/<int:idCategoria>/console-id/<int:idConsole>', methods=['GET'])
+def postAssociaConsoleEmCategoria(idCategoria, idConsole):
+    token = request.headers.get('Authorization')
+
+    if token:
+
+        if validaToken(token):
+            return postConsoleEmCategoria(idCategoria, idConsole)
 
         return None
 

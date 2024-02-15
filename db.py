@@ -66,7 +66,8 @@ def criando_schemas():
     TABLES['Console'] = ('''
         CREATE TABLE `console` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
-            `nome` varchar(20) NOT NULL,
+            `nome` varchar(100) NOT NULL,
+            `icone` varchar(100) NOT NULL,
             `usuario_id` int(11),
             PRIMARY KEY (id),
             FOREIGN KEY (usuario_id) REFERENCES usuario(id)
@@ -83,11 +84,22 @@ def criando_schemas():
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;'''
                            )
 
+    TABLES['CategoriaConsole'] = ('''
+            CREATE TABLE `categoria_console` (
+                `categoria_id` int(11) NOT NULL,
+                `console_id` int(11) NOT NULL,
+                FOREIGN KEY (categoria_id) REFERENCES categoria(id),
+                FOREIGN KEY (console_id) REFERENCES console(id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;'''
+                         )
+
     TABLES['Jogo'] = ('''
         CREATE TABLE `jogo` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
-            `nome` varchar(20) NOT NULL,
-            `img` varchar(100) NOT NULL,
+            `nome` varchar(100) NOT NULL,
+            `img` varchar(1000) NOT NULL,
+            `preco` varchar(11) NOT NULL,
+            `desconto` int(11),
             `categoria_id` int(11),
             `console_id` int(11),
             `usuario_id` int(11),

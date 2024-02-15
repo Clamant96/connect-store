@@ -12,12 +12,12 @@ def findAllConsole() -> list[dict[Any, Any]]:
     query = '''
         SELECT
           JSON_PRETTY(
-              JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'usuarios', s.usuarios))) AS consoles
+              JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'icone', c.icone, 'usuarios', s.usuarios))) AS consoles
             FROM
                 connect_store.console c
             left join (
                 SELECT u.id, 
-                    JSON_ARRAYAGG(JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email)) AS usuarios  
+                    JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email) AS usuarios  
                 FROM 
                     connect_store.usuario u 
             GROUP BY u.id) s ON s.id = c.usuario_id;
@@ -48,7 +48,7 @@ def findByIdConsole(id: int) -> Console|None:
                 connect_store.console c
             left join (
                 SELECT u.id, 
-                    JSON_ARRAYAGG(JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email)) AS usuarios  
+                    JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email) AS usuarios  
                 FROM 
                     connect_store.usuario u 
             GROUP BY u.id) s ON s.id = c.usuario_id 
@@ -90,7 +90,7 @@ def postConsole(console: Console) -> str:
 
     if findByNomeConsole(console['nome']) == None:
         con = acessando_base() # faz a conexao com o banco
-        query = "INSERT INTO console (nome, usuario_id) VALUES ('{}', {});".format(console['nome'], console['usuario_id'])  # faz monta q query
+        query = "INSERT INTO console (nome, icone, usuario_id) VALUES ('{}', '{}', {});".format(console['nome'], console['icone'], console['usuario_id'])  # faz monta q query
         cursor = con.cursor()
         result = cursor.execute(query) # faz a busca no banco
         con.commit() # registrar os dados no banco
@@ -109,7 +109,7 @@ def putConsole(console: Console) -> str:
 
     if findByIdConsole(console['id']) != None:
         con = acessando_base() # faz a conexao com o banco
-        query = "UPDATE console SET nome = '{}', usuario_id = {} WHERE id = {};".format(console['nome'], console['usuario_id'], console['id'])  # faz monta q query
+        query = "UPDATE console SET nome = '{}', icone = '{}', usuario_id = {} WHERE id = {};".format(console['nome'], console['icone'], console['usuario_id'], console['id'])  # faz monta q query
         cursor = con.cursor()
         cursor.execute(query) # faz a busca no banco
         con.commit() # registrar os dados no banco

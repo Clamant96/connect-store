@@ -12,24 +12,24 @@ def findAllJogo() -> list[dict[Any, Any]]:
     query = '''
         SELECT
           JSON_PRETTY(
-              JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'usuarios', s.usuarios, 'categorias', cs.categorias, 'consoles', csn.consoles))) AS jogos
+              JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img, 'preco', j.preco, 'desconto', j.desconto, 'usuarios', s.usuarios, 'categorias', cs.categorias, 'consoles', csn.consoles))) AS jogos
             FROM
                 connect_store.jogo j
             left join (
                 SELECT u.id, 
-                    JSON_ARRAYAGG(JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email)) AS usuarios  
+                    JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email) AS usuarios  
                 FROM 
                     connect_store.usuario u 
             GROUP BY u.id) s ON s.id = j.usuario_id
             left join (
                 SELECT c.id, 
-                    JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome)) AS categorias  
+                    JSON_OBJECT('id', c.id, 'nome', c.nome) AS categorias  
                 FROM 
                     connect_store.categoria c 
             GROUP BY c.id) cs ON cs.id = j.categoria_id
             left join (
                 SELECT con.id, 
-                    JSON_ARRAYAGG(JSON_OBJECT('id', con.id, 'nome', con.nome)) AS consoles
+                    JSON_OBJECT('id', con.id, 'nome', con.nome, 'icone', con.icone) AS consoles
                 FROM 
                     connect_store.console con 
             GROUP BY con.id) csn ON csn.id = j.console_id;
@@ -55,24 +55,24 @@ def findByIdJogo(id: int) -> Jogo|None:
     query = '''
             SELECT
               JSON_PRETTY(
-                  JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'usuarios', s.usuarios, 'categorias', cs.categorias, 'consoles', csn.consoles))) AS jogos
+                  JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img, 'preco', j.preco, 'desconto', j.desconto, 'usuarios', s.usuarios, 'categorias', cs.categorias, 'consoles', csn.consoles))) AS jogos
                 FROM
                     connect_store.jogo j
                 left join (
                     SELECT u.id, 
-                        JSON_ARRAYAGG(JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email)) AS usuarios  
+                        JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email) AS usuarios  
                     FROM 
                         connect_store.usuario u 
                 GROUP BY u.id) s ON s.id = j.usuario_id
                 left join (
                     SELECT c.id, 
-                        JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome)) AS categorias  
+                        JSON_OBJECT('id', c.id, 'nome', c.nome) AS categorias  
                     FROM 
                         connect_store.categoria c 
                 GROUP BY c.id) cs ON cs.id = j.categoria_id
                 left join (
                     SELECT con.id, 
-                        JSON_ARRAYAGG(JSON_OBJECT('id', con.id, 'nome', con.nome)) AS consoles
+                        JSON_OBJECT('id', con.id, 'nome', con.nome, 'icone', con.icone) AS consoles
                     FROM 
                         connect_store.console con 
                 GROUP BY con.id) csn ON csn.id = j.console_id
@@ -114,7 +114,7 @@ def postJogo(jogo: Jogo) -> str:
 
     if findByNomeJogo(jogo['nome']) == None:
         con = acessando_base() # faz a conexao com o banco
-        query = "INSERT INTO jogo (nome, img, categoria_id, console_id, usuario_id) VALUES ('{}', '{}', {}, {}, {});".format(jogo['nome'], jogo['img'], jogo['categoria_id'], jogo['console_id'], jogo['usuario_id'])  # faz monta q query
+        query = "INSERT INTO jogo (nome, img, preco, desconto, categoria_id, console_id, usuario_id) VALUES ('{}', '{}', '{}', {}, {}, {}, {});".format(jogo['nome'], jogo['img'], jogo['preco'], jogo['desconto'], jogo['categoria_id'], jogo['console_id'], jogo['usuario_id'])  # faz monta q query
         cursor = con.cursor()
         result = cursor.execute(query) # faz a busca no banco
         con.commit() # registrar os dados no banco
@@ -131,7 +131,7 @@ def putJogo(jogo: Jogo) -> str:
 
     if findByIdJogo(jogo['id']) != None:
         con = acessando_base() # faz a conexao com o banco
-        query = "UPDATE jogo SET nome = '{}', img = '{}', categoria_id = {} , console_id = {}, usuario_id = {} WHERE id = {};".format(jogo['nome'], jogo['img'], jogo['categoria_id'], jogo['console_id'], jogo['usuario_id'], jogo['id'])  # faz monta q query
+        query = "UPDATE jogo SET nome = '{}', img = '{}', preco = '{}', desconto = {}, categoria_id = {} , console_id = {}, usuario_id = {} WHERE id = {};".format(jogo['nome'], jogo['img'], jogo['preco'], jogo['desconto'], jogo['categoria_id'], jogo['console_id'], jogo['usuario_id'], jogo['id'])  # faz monta q query
         cursor = con.cursor()
         cursor.execute(query) # faz a busca no banco
         con.commit() # registrar os dados no banco
