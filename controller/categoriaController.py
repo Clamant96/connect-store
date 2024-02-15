@@ -29,14 +29,14 @@ def getByIdCategoria(id: int):
 
     return 'Acesso nao autorizado'
 
-@app.route('/categoria/all-jogos-categoria', methods=['GET'])
-def getAllJogosCategoria():
+@app.route('/categoria/all-jogos-com-console-usuario-e-categoria', methods=['GET'])
+def getAllJogosComSeusConsolesEUsuarioCategoria():
     data = request.headers.get('Authorization')
 
     if data:
 
         if validaToken(data):
-            return jsonify(findAllJogosEConsolesCategoria())
+            return jsonify(findAllJogosComSeusConsolesEUsuarioCategoria())
 
         return None
 

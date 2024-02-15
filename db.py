@@ -112,6 +112,15 @@ def criando_schemas():
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;'''
                       )
 
+    TABLES['JogoConsole'] = ('''
+        CREATE TABLE `jogo_console` (
+            `jogo_id` int(11) NOT NULL,
+            `console_id` int(11) NOT NULL,
+            FOREIGN KEY (jogo_id) REFERENCES jogo(id),
+            FOREIGN KEY (console_id) REFERENCES console(id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;'''
+                          )
+
     # insere as tabelas no banco
     for tabela_nome in TABLES:
         tabela_sql = TABLES[tabela_nome]

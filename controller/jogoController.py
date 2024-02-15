@@ -16,7 +16,18 @@ def getAllJogos():
 
     return 'Acesso nao autorizado'
 
+@app.route('/jogo/jogos-consoles/', methods=['GET'])
+def getAllJogosConsoles():
+    data = request.headers.get('Authorization')
 
+    if data:
+
+        if validaToken(data):
+            return jsonify(findAllJogosConsoles())
+
+        return None
+
+    return 'Acesso nao autorizado'
 
 @app.route('/jogo/<int:id>', methods=['GET'])
 def getByIdJogos(id: int):
@@ -67,6 +78,19 @@ def deletarJogos(id):
 
         if validaToken(token):
             return deleteByIdJogo(id)
+
+        return None
+
+    return 'Acesso nao autorizado'
+
+@app.route('/jogo/associa-dados/jogo-id/<int:idJogo>/console-id/<int:idConsole>', methods=['GET'])
+def postAssociaConsoleEmJogo(idJogo, idConsole):
+    token = request.headers.get('Authorization')
+
+    if token:
+
+        if validaToken(token):
+            return postConsoleEmJogo(idJogo, idConsole)
 
         return None
 

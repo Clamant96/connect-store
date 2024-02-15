@@ -89,22 +89,41 @@ def findByNomeCategoria(nome: str) -> Categoria|None:
     else:
         return None
 
-def findAllJogosEConsolesCategoria() -> Categoria|None:
+def findAllJogosComSeusConsolesEUsuarioCategoria() -> Categoria|None:
 
     con = acessando_base() # faz a conexao com o banco
     # query = "SELECT * FROM categoria WHERE id = {}".format(id)  # faz monta q query
     query = '''
         SELECT 
-            JSON_PRETTY(
-                  JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'uri', c.uri, 'img', c.img, 'jogos', cs.jogos, 'consoles', csn.consoles))) AS categorias
-              FROM 
+                JSON_PRETTY(
+                  JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'uri', c.uri, 'img', c.img, 'jogos', cs.jogos, 'usuarios', s.usuarios, 'consoles', csn.consoles))) AS categorias
+            FROM 
                 connect_store.categoria AS c 
-              left join (
-                SELECT j.categoria_id, 
-                    JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img, 'preco', j.preco, 'desconto', j.desconto)) AS jogos
-                FROM 
-                    connect_store.jogo AS j
-            GROUP BY j.categoria_id) cs ON cs.categoria_id = c.id
+                
+                    left join (
+                        SELECT j.categoria_id, 
+                            JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img, 'preco', j.preco, 'desconto', j.desconto, 'consoles', csn.consoles)) AS jogos
+                        FROM 
+                            connect_store.jogo AS j 
+                            
+                                left join (
+                                    SELECT cc.jogo_id, 
+                                        JSON_ARRAYAGG(JSON_OBJECT('id', con.id, 'nome', con.nome, 'icone', con.icone)) AS consoles
+                                    FROM 
+                                        connect_store.console AS con 
+                                            left join 
+                                                connect_store.jogo_console AS cc 
+                                            ON con.id = cc.console_id 
+                                    GROUP BY cc.jogo_id) csn 
+                                ON j.id = csn.jogo_id
+                            
+                        GROUP BY j.categoria_id) cs ON cs.categoria_id = c.id
+                    left join (
+                        SELECT u.id, 
+                            JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email) AS usuarios  
+                        FROM 
+                            connect_store.usuario u 
+                    GROUP BY u.id) s ON s.id = c.usuario_id
                 left join (
                     SELECT cc.categoria_id, 
                         JSON_ARRAYAGG(JSON_OBJECT('id', con.id, 'nome', con.nome, 'icone', con.icone)) AS consoles
@@ -132,16 +151,35 @@ def findAllJogosCategoriaById(id: int) -> Categoria|None:
     # query = "SELECT * FROM categoria WHERE id = {}".format(id)  # faz monta q query
     query = '''
         SELECT 
-            JSON_PRETTY(
-                  JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'uri', c.uri, 'img', c.img, 'jogos', cs.jogos, 'consoles', csn.consoles))) AS categorias
-              FROM 
+                JSON_PRETTY(
+                  JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'uri', c.uri, 'img', c.img, 'jogos', cs.jogos, 'usuarios', s.usuarios, 'consoles', csn.consoles))) AS categorias
+            FROM 
                 connect_store.categoria AS c 
-              left join (
-                SELECT j.categoria_id, 
-                    JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img, 'preco', j.preco, 'desconto', j.desconto)) AS jogos
-                FROM 
-                    connect_store.jogo AS j
-            GROUP BY j.categoria_id) cs ON cs.categoria_id = c.id
+                
+                    left join (
+                        SELECT j.categoria_id, 
+                            JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img, 'preco', j.preco, 'desconto', j.desconto, 'consoles', csn.consoles)) AS jogos
+                        FROM 
+                            connect_store.jogo AS j 
+                            
+                                left join (
+                                    SELECT cc.jogo_id, 
+                                        JSON_ARRAYAGG(JSON_OBJECT('id', con.id, 'nome', con.nome, 'icone', con.icone)) AS consoles
+                                    FROM 
+                                        connect_store.console AS con 
+                                            left join 
+                                                connect_store.jogo_console AS cc 
+                                            ON con.id = cc.console_id 
+                                    GROUP BY cc.jogo_id) csn 
+                                ON j.id = csn.jogo_id
+                            
+                        GROUP BY j.categoria_id) cs ON cs.categoria_id = c.id
+                    left join (
+                        SELECT u.id, 
+                            JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email) AS usuarios  
+                        FROM 
+                            connect_store.usuario u 
+                    GROUP BY u.id) s ON s.id = c.usuario_id
                 left join (
                     SELECT cc.categoria_id, 
                         JSON_ARRAYAGG(JSON_OBJECT('id', con.id, 'nome', con.nome, 'icone', con.icone)) AS consoles
@@ -170,16 +208,35 @@ def findAllJogosCategoriaByUri(uri: str) -> Categoria|None:
     # query = "SELECT * FROM categoria WHERE id = {}".format(id)  # faz monta q query
     query = '''
         SELECT 
-            JSON_PRETTY(
-                  JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'uri', c.uri, 'img', c.img, 'jogos', cs.jogos, 'consoles', csn.consoles))) AS categorias
-              FROM 
+                JSON_PRETTY(
+                  JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'uri', c.uri, 'img', c.img, 'jogos', cs.jogos, 'usuarios', s.usuarios, 'consoles', csn.consoles))) AS categorias
+            FROM 
                 connect_store.categoria AS c 
-              left join (
-                SELECT j.categoria_id, 
-                    JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img, 'preco', j.preco, 'desconto', j.desconto)) AS jogos
-                FROM 
-                    connect_store.jogo AS j
-            GROUP BY j.categoria_id) cs ON cs.categoria_id = c.id
+                
+                    left join (
+                        SELECT j.categoria_id, 
+                            JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img, 'preco', j.preco, 'desconto', j.desconto, 'consoles', csn.consoles)) AS jogos
+                        FROM 
+                            connect_store.jogo AS j 
+                            
+                                left join (
+                                    SELECT cc.jogo_id, 
+                                        JSON_ARRAYAGG(JSON_OBJECT('id', con.id, 'nome', con.nome, 'icone', con.icone)) AS consoles
+                                    FROM 
+                                        connect_store.console AS con 
+                                            left join 
+                                                connect_store.jogo_console AS cc 
+                                            ON con.id = cc.console_id 
+                                    GROUP BY cc.jogo_id) csn 
+                                ON j.id = csn.jogo_id
+                            
+                        GROUP BY j.categoria_id) cs ON cs.categoria_id = c.id
+                    left join (
+                        SELECT u.id, 
+                            JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email) AS usuarios  
+                        FROM 
+                            connect_store.usuario u 
+                    GROUP BY u.id) s ON s.id = c.usuario_id
                 left join (
                     SELECT cc.categoria_id, 
                         JSON_ARRAYAGG(JSON_OBJECT('id', con.id, 'nome', con.nome, 'icone', con.icone)) AS consoles
