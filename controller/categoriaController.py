@@ -55,6 +55,19 @@ def getAllJogosCategoriaById(id: int):
 
     return 'Acesso nao autorizado'
 
+@app.route('/categoria/all-jogos-categoria-uri/<uri>', methods=['GET'])
+def getAllJogosCategoriaByUri(uri: str):
+    data = request.headers.get('Authorization')
+
+    if data:
+
+        if validaToken(data):
+            return jsonify(findAllJogosCategoriaByUri(uri))
+
+        return None
+
+    return 'Acesso nao autorizado'
+
 @app.route('/categoria/criar-categoria', methods=['POST'])
 def criarCategoria():
     data = request.get_json(silent=True)

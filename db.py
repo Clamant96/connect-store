@@ -77,7 +77,9 @@ def criando_schemas():
     TABLES['Categoria'] = ('''
         CREATE TABLE `categoria` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
-            `nome` varchar(20) NOT NULL,
+            `nome` varchar(100) NOT NULL,
+            `uri` varchar(100) NOT NULL,
+            `img` varchar(1000) NOT NULL,
             `usuario_id` int(11),
             PRIMARY KEY (id),
             FOREIGN KEY (usuario_id) REFERENCES usuario(id)
