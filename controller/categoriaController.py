@@ -2,6 +2,7 @@ from connectStore import app
 from repository.categoriaRepository import *
 from flask import jsonify, request
 from utils import validaToken
+from repository.upload import uploadImagem
 
 @app.route('/categoria/', methods=['GET'])
 def getAllCategoria():
@@ -29,6 +30,19 @@ def getByIdCategoria(id: int):
 
     return 'Acesso nao autorizado'
 
+@app.route('/categoria/order-by-limit-1', methods=['GET'])
+def getByCategoriaOrderByIdLimit1():
+    data = request.headers.get('Authorization')
+
+    if data:
+
+        if validaToken(data):
+            return jsonify(findByIdCategoriaLimit1())
+
+        return None
+
+    return 'Acesso nao autorizado'
+
 @app.route('/categoria/all-jogos-com-console-usuario-e-categoria', methods=['GET'])
 def getAllJogosComSeusConsolesEUsuarioCategoria():
     data = request.headers.get('Authorization')
@@ -37,6 +51,19 @@ def getAllJogosComSeusConsolesEUsuarioCategoria():
 
         if validaToken(data):
             return jsonify(findAllJogosComSeusConsolesEUsuarioCategoria())
+
+        return None
+
+    return 'Acesso nao autorizado'
+
+@app.route('/categoria/all-jogos-com-console-usuario-e-categoria-many-to-many-jogos', methods=['GET'])
+def getAllJogosComSeusConsolesEUsuarioCategoriaManyToManyJogos():
+    data = request.headers.get('Authorization')
+
+    if data:
+
+        if validaToken(data):
+            return jsonify(findAllJogosComSeusConsolesEUsuarioCategoriaManyToManyJogos())
 
         return None
 
@@ -55,6 +82,19 @@ def getAllJogosCategoriaById(id: int):
 
     return 'Acesso nao autorizado'
 
+@app.route('/categoria/all-jogos-com-console-usuario-e-categoria-by-id-many-to-many-jogos/<int:id>', methods=['GET'])
+def getAllJogosComSeusConsolesEUsuarioCategoriaByIdManyToManyJogos(id: int):
+    data = request.headers.get('Authorization')
+
+    if data:
+
+        if validaToken(data):
+            return jsonify(findAllJogosComSeusConsolesEUsuarioCategoriaByIdManyToManyJogos(id))
+
+        return None
+
+    return 'Acesso nao autorizado'
+
 @app.route('/categoria/all-jogos-categoria-uri/<uri>', methods=['GET'])
 def getAllJogosCategoriaByUri(uri: str):
     data = request.headers.get('Authorization')
@@ -63,6 +103,19 @@ def getAllJogosCategoriaByUri(uri: str):
 
         if validaToken(data):
             return jsonify(findAllJogosCategoriaByUri(uri))
+
+        return None
+
+    return 'Acesso nao autorizado'
+
+@app.route('/categoria/all-jogos-com-console-usuario-e-categoria-by-uri-many-to-many-jogos/<uri>', methods=['GET'])
+def getAllJogosComSeusConsolesEUsuarioCategoriaByUriManyToManyJogos(uri: str):
+    data = request.headers.get('Authorization')
+
+    if data:
+
+        if validaToken(data):
+            return jsonify(findAllJogosComSeusConsolesEUsuarioCategoriaByUriManyToManyJogos(uri))
 
         return None
 
@@ -123,3 +176,37 @@ def postAssociaConsoleEmCategoria(idCategoria, idConsole):
         return None
 
     return 'Acesso nao autorizado'
+
+@app.route('/categoria/cadastrar-categoria', methods=['POST'])
+def postCategoriaObj():
+    data = request.get_json(silent=True)
+
+    print('DATA postCategoriaObj(): ', data)
+
+    token = request.headers.get('Authorization')
+
+    if token:
+
+        if validaToken(token):
+            return postCategoriaObjCompleto(data)
+
+        return None
+
+    return 'Acesso nao autorizado'
+
+@app.route('/categoria/upload', methods=['POST'])
+def postUploadImagem() -> str | None:
+    token = request.headers.get('Authorization')
+
+    if token:
+
+        if validaToken(token):
+
+            retorno = uploadImagem(request.files['file'], 'categorias')
+
+            if validaToken(token) and retorno is not None:
+                return retorno
+
+        return 'Ocorreu um erro ao tentar salvar o aquivo no repositorio.'
+    else:
+        return 'Acesso nao autorizado'

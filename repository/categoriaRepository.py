@@ -4,6 +4,8 @@ from db import acessando_base
 from models.categoria import *
 from utils import converteDictEmJsonAll
 from connectStore import findByIdConsole
+from repository.jogoRepository import findByIdJogo
+from flask import Response
 
 import json
 
@@ -68,6 +70,31 @@ def findByIdCategoria(id: int) -> Categoria|None:
 
     if result[0]['categorias'] != None:
         return json.loads(result[0]['categorias'])[0]  # retorna somente o objeto JSON
+    else:
+        return None
+
+def findByIdCategoriaLimit1() -> Categoria|None:
+
+    con = acessando_base() # faz a conexao com o banco
+    query = '''
+        SELECT
+          JSON_PRETTY(
+              JSON_OBJECT('id', c.id, 'nome', c.nome, 'uri', c.uri, 'img', c.img)) AS categorias
+            FROM
+                connect_store.categoria c
+        ORDER BY c.id DESC limit 1;
+    '''
+    cursor = con.cursor()
+    cursor.execute(query) # faz a busca no banco
+
+    result = converteDictEmJsonAll(cursor) # faz a busca no banco e formata o retorno e retorna somente 1 dado
+
+    if con.is_connected():
+        con.close()
+        cursor.close()
+
+    if result[0]['categorias'] != None:
+        return json.loads(result[0]['categorias'])  # retorna somente o objeto JSON
     else:
         return None
 
@@ -136,7 +163,72 @@ def findAllJogosComSeusConsolesEUsuarioCategoria() -> Categoria|None:
 
     result = converteDictEmJsonAll(cursor) # faz a busca no banco e formata o retorno e retorna somente 1 dado
 
+    print('conexao ativa? ', con.is_connected())
+
     if con.is_connected():
+        print('Conexao finalizada!')
+        con.close()
+        cursor.close()
+
+    if result[0]['categorias'] != None:
+        return json.loads(result[0]['categorias'])  # retorna somente o objeto JSON
+    else:
+        return None
+
+
+def findAllJogosComSeusConsolesEUsuarioCategoriaManyToManyJogos() -> Categoria | None:
+    con = acessando_base()  # faz a conexao com o banco
+    # query = "SELECT * FROM categoria WHERE id = {}".format(id)  # faz monta q query
+    query = '''
+        SELECT 
+                JSON_PRETTY(
+                  JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'uri', c.uri, 'img', c.img, 'jogos', cs.jogos, 'usuarios', s.usuarios, 'consoles', csn.consoles))) AS categorias
+            FROM 
+                connect_store.categoria AS c 
+                
+                    left join (
+                        SELECT u.id, 
+                            JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email) AS usuarios  
+                        FROM 
+                            connect_store.usuario u 
+                    GROUP BY u.id) s ON s.id = c.usuario_id
+                    
+                left join (
+                    SELECT cc.categoria_id, 
+                        JSON_ARRAYAGG(JSON_OBJECT('id', con.id, 'nome', con.nome, 'icone', con.icone)) AS consoles
+                    FROM 
+                        connect_store.categoria AS cat RIGHT JOIN connect_store.categoria_console AS cc ON cc.categoria_id = cat.id LEFT JOIN connect_store.console AS con ON cc.console_id = con.id 
+                GROUP BY cc.categoria_id) csn ON csn.categoria_id = c.id
+                
+                left join (
+                    SELECT cc.categoria_id, 
+                        JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img, 'preco', j.preco, 'desconto', j.desconto, 'consoles', jcsn.consoles)) AS jogos
+                    FROM 
+                        connect_store.categoria AS cat RIGHT JOIN connect_store.categoria_jogo AS cc ON cc.categoria_id = cat.id LEFT JOIN connect_store.jogo AS j ON cc.jogo_id = j.id 
+                            
+                            -- ADICIONA OS CONSOLES NO OBJ JOGO
+                                left join (
+                                    SELECT jogocons.jogo_id, 
+                                        JSON_ARRAYAGG(JSON_OBJECT('id', cons.id, 'nome', cons.nome, 'icone', cons.icone)) AS consoles
+                                    FROM 
+                                        connect_store.console AS cons 
+                                            left join 
+                                                connect_store.jogo_console AS jogocons 
+                                            ON cons.id = jogocons.console_id 
+                                    GROUP BY jogocons.jogo_id) jcsn 
+                                ON j.id = jcsn.jogo_id
+                            
+                GROUP BY cc.categoria_id) cs ON cs.categoria_id = c.id;
+    '''
+    cursor = con.cursor()
+    cursor.execute(query)  # faz a busca no banco
+
+    result = converteDictEmJsonAll(cursor)  # faz a busca no banco e formata o retorno e retorna somente 1 dado
+
+    print('conexao ativa? ', con.is_connected())
+
+    if con.is_connected():
+        print('Conexao finalizada!')
         con.close()
         cursor.close()
 
@@ -202,6 +294,69 @@ def findAllJogosCategoriaById(id: int) -> Categoria|None:
     else:
         return None
 
+
+def findAllJogosComSeusConsolesEUsuarioCategoriaByIdManyToManyJogos(id: int) -> Categoria | None:
+    con = acessando_base()  # faz a conexao com o banco
+    # query = "SELECT * FROM categoria WHERE id = {}".format(id)  # faz monta q query
+    query = '''
+        SELECT 
+                JSON_PRETTY(
+                  JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'uri', c.uri, 'img', c.img, 'jogos', cs.jogos, 'usuarios', s.usuarios, 'consoles', csn.consoles))) AS categorias
+            FROM 
+                connect_store.categoria AS c 
+
+                    left join (
+                        SELECT u.id, 
+                            JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email) AS usuarios  
+                        FROM 
+                            connect_store.usuario u 
+                    GROUP BY u.id) s ON s.id = c.usuario_id
+
+                left join (
+                    SELECT cc.categoria_id, 
+                        JSON_ARRAYAGG(JSON_OBJECT('id', con.id, 'nome', con.nome, 'icone', con.icone)) AS consoles
+                    FROM 
+                        connect_store.categoria AS cat RIGHT JOIN connect_store.categoria_console AS cc ON cc.categoria_id = cat.id LEFT JOIN connect_store.console AS con ON cc.console_id = con.id 
+                GROUP BY cc.categoria_id) csn ON csn.categoria_id = c.id
+
+                left join (
+                    SELECT cc.categoria_id, 
+                        JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img, 'preco', j.preco, 'desconto', j.desconto, 'consoles', jcsn.consoles)) AS jogos
+                    FROM 
+                        connect_store.categoria AS cat RIGHT JOIN connect_store.categoria_jogo AS cc ON cc.categoria_id = cat.id LEFT JOIN connect_store.jogo AS j ON cc.jogo_id = j.id 
+
+                            -- ADICIONA OS CONSOLES NO OBJ JOGO
+                                left join (
+                                    SELECT jogocons.jogo_id, 
+                                        JSON_ARRAYAGG(JSON_OBJECT('id', cons.id, 'nome', cons.nome, 'icone', cons.icone)) AS consoles
+                                    FROM 
+                                        connect_store.console AS cons 
+                                            left join 
+                                                connect_store.jogo_console AS jogocons 
+                                            ON cons.id = jogocons.console_id 
+                                    GROUP BY jogocons.jogo_id) jcsn 
+                                ON j.id = jcsn.jogo_id
+
+                GROUP BY cc.categoria_id) cs ON cs.categoria_id = c.id
+            WHERE c.id = {};
+    '''.format(id)
+    cursor = con.cursor()
+    cursor.execute(query)  # faz a busca no banco
+
+    result = converteDictEmJsonAll(cursor)  # faz a busca no banco e formata o retorno e retorna somente 1 dado
+
+    print('conexao ativa? ', con.is_connected())
+
+    if con.is_connected():
+        print('Conexao finalizada!')
+        con.close()
+        cursor.close()
+
+    if result[0]['categorias'] != None:
+        return json.loads(result[0]['categorias'])[0]  # retorna somente o objeto JSON
+    else:
+        return None
+
 def findAllJogosCategoriaByUri(uri: str) -> Categoria|None:
 
     con = acessando_base() # faz a conexao com o banco
@@ -259,7 +414,69 @@ def findAllJogosCategoriaByUri(uri: str) -> Categoria|None:
     else:
         return None
 
-def postCategoria(categoria: Categoria) -> str:
+def findAllJogosComSeusConsolesEUsuarioCategoriaByUriManyToManyJogos(uri: str) -> Categoria | None:
+    con = acessando_base()  # faz a conexao com o banco
+    # query = "SELECT * FROM categoria WHERE id = {}".format(id)  # faz monta q query
+    query = '''
+        SELECT 
+                JSON_PRETTY(
+                  JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'uri', c.uri, 'img', c.img, 'jogos', cs.jogos, 'usuarios', s.usuarios, 'consoles', csn.consoles))) AS categorias
+            FROM 
+                connect_store.categoria AS c 
+
+                    left join (
+                        SELECT u.id, 
+                            JSON_OBJECT('id', u.id, 'name', u.nome, 'username', u.username, 'email', u.email) AS usuarios  
+                        FROM 
+                            connect_store.usuario u 
+                    GROUP BY u.id) s ON s.id = c.usuario_id
+
+                left join (
+                    SELECT cc.categoria_id, 
+                        JSON_ARRAYAGG(JSON_OBJECT('id', con.id, 'nome', con.nome, 'icone', con.icone)) AS consoles
+                    FROM 
+                        connect_store.categoria AS cat RIGHT JOIN connect_store.categoria_console AS cc ON cc.categoria_id = cat.id LEFT JOIN connect_store.console AS con ON cc.console_id = con.id 
+                GROUP BY cc.categoria_id) csn ON csn.categoria_id = c.id
+
+                left join (
+                    SELECT cc.categoria_id, 
+                        JSON_ARRAYAGG(JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img, 'preco', j.preco, 'desconto', j.desconto, 'consoles', jcsn.consoles)) AS jogos
+                    FROM 
+                        connect_store.categoria AS cat RIGHT JOIN connect_store.categoria_jogo AS cc ON cc.categoria_id = cat.id LEFT JOIN connect_store.jogo AS j ON cc.jogo_id = j.id 
+
+                            -- ADICIONA OS CONSOLES NO OBJ JOGO
+                                left join (
+                                    SELECT jogocons.jogo_id, 
+                                        JSON_ARRAYAGG(JSON_OBJECT('id', cons.id, 'nome', cons.nome, 'icone', cons.icone)) AS consoles
+                                    FROM 
+                                        connect_store.console AS cons 
+                                            left join 
+                                                connect_store.jogo_console AS jogocons 
+                                            ON cons.id = jogocons.console_id 
+                                    GROUP BY jogocons.jogo_id) jcsn 
+                                ON j.id = jcsn.jogo_id
+
+                GROUP BY cc.categoria_id) cs ON cs.categoria_id = c.id
+            WHERE c.uri = '{}';
+    '''.format(uri)
+    cursor = con.cursor()
+    cursor.execute(query)  # faz a busca no banco
+
+    result = converteDictEmJsonAll(cursor)  # faz a busca no banco e formata o retorno e retorna somente 1 dado
+
+    print('conexao ativa? ', con.is_connected())
+
+    if con.is_connected():
+        print('Conexao finalizada!')
+        con.close()
+        cursor.close()
+
+    if result[0]['categorias'] != None:
+        return json.loads(result[0]['categorias'])[0]  # retorna somente o objeto JSON
+    else:
+        return None
+
+def postCategoria(categoria: Categoria):
 
     if findByNomeCategoria(categoria['nome']) == None:
         con = acessando_base() # faz a conexao com o banco
@@ -272,15 +489,86 @@ def postCategoria(categoria: Categoria) -> str:
             con.close()
             cursor.close()
 
-        return 'Categoria cadastrado com sucesso!'
+        return Response('Categoria cadastrado com sucesso!', status=200)
 
-    return 'Categoria ja existe na base.'
+    return Response('Categoria ja existe na base.', status=500)
+
+def postCategoriaObjCompleto(categoria: CategoriaRequest):
+
+    print('postCategoriaObjCompleto(): ', categoria)
+
+    categoria['uri'] = str(categoria['uri']).replace(' ', '-')
+
+    if findByNomeCategoria(categoria['nome']) == None:
+
+        con = acessando_base() # faz a conexao com o banco
+        query = "INSERT INTO categoria (nome, uri, img, usuario_id) VALUES ('{}', '{}', '{}', {});".format(categoria['nome'], categoria['uri'], categoria['img'], categoria['usuario_id'])  # faz monta q query
+        cursor = con.cursor()
+        result = cursor.execute(query) # faz a busca no banco
+        con.commit() # registrar os dados no banco
+
+        if con.is_connected():
+            con.close()
+            cursor.close()
+
+        categoriaCriada = findByIdCategoriaLimit1()
+
+        print('categoriaCriada: ', categoriaCriada)
+
+        print('categoriaCriada NOME: ', categoriaCriada['nome'])
+        print('categoria NOME: ', categoria['nome'])
+
+        if categoriaCriada['nome'] == categoria['nome']:
+            print('CATEGORIA CADASTRADA E LOCALIZADA, AGORA SERA FEIRA A ASSOCIACAO MANY-TO-MANY')
+
+            if categoria['consoles']:
+
+                print('categoria CONSOLES', categoria['consoles'])
+
+                for console in categoria['consoles']:
+
+                    print('console: ', console)
+
+                    if categoriaCriada['id']:
+                        postConsoleEmCategoria(categoriaCriada['id'], console['id'])
+
+            if categoria['jogos']:
+
+                print('categoria JOGOS', categoria['jogos'])
+
+                for jogo in categoria['jogos']:
+
+                    print('jogo: ', jogo)
+
+                    if categoriaCriada['id']:
+                        postJogoEmCategoria(categoriaCriada['id'], jogo['id'])
+
+            return Response('Categoria cadastrado com sucesso!', status=200)
+
+        return Response('Categoria ja existe na base.', status=500)
 
 def postConsoleEmCategoria(idCategoria: int, idConsole: int) -> str:
 
     if findByIdCategoria(idCategoria) != None and findByIdConsole(idConsole) != None:
         con = acessando_base() # faz a conexao com o banco
         query = "INSERT INTO connect_store.categoria_console (categoria_id, console_id) VALUES ('{}', {});".format(idCategoria, idConsole)
+        cursor = con.cursor()
+        result = cursor.execute(query) # faz a busca no banco
+        con.commit() # registrar os dados no banco
+
+        if con.is_connected():
+            con.close()
+            cursor.close()
+
+        return 'Associacao realizada com sucesso!'
+
+    return 'Nao foi possivel associar os dados.'
+
+def postJogoEmCategoria(idCategoria: int, idJogo: int) -> str:
+
+    if findByIdCategoria(idCategoria) != None and findByIdJogo(idJogo) != None:
+        con = acessando_base() # faz a conexao com o banco
+        query = "INSERT INTO connect_store.categoria_jogo (categoria_id, jogo_id) VALUES ('{}', {});".format(idCategoria, idJogo)
         cursor = con.cursor()
         result = cursor.execute(query) # faz a busca no banco
         con.commit() # registrar os dados no banco

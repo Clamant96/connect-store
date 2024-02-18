@@ -1,0 +1,2 @@
+class Imagem():
+    nome: str

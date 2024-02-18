@@ -1,3 +1,5 @@
+import os
+
 SECRET_KEY = 'connectStore'
 
 URI = '{SGBD}://{usuario}:{senha}@{servidor}/{database}'.format(
@@ -7,3 +9,5 @@ URI = '{SGBD}://{usuario}:{senha}@{servidor}/{database}'.format(
     servidor='localhost',
     database='connect_store'
 )
+
+UPLOAD_PATH = os.path.dirname(os.path.abspath(__file__)) + '\\uploads'

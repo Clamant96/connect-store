@@ -36,7 +36,7 @@ def acessando_base():
             # print("Conectado no banco: ", record)
 
     except Error as e:
-        print("Error while connecting to MySQL", e)
+        print("Ocorreu um erro ao tentar se conectar ao banco de dados MySQL: ERRO [{}]".format(e))
 
     return connection
 
@@ -120,6 +120,15 @@ def criando_schemas():
             FOREIGN KEY (console_id) REFERENCES console(id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;'''
                           )
+
+    TABLES['CategoriaJogo'] = ('''
+            CREATE TABLE `categoria_jogo` (
+                `categoria_id` int(11) NOT NULL,
+                `jogo_id` int(11) NOT NULL,
+                FOREIGN KEY (categoria_id) REFERENCES categoria(id),
+                FOREIGN KEY (jogo_id) REFERENCES jogo(id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;'''
+                             )
 
     # insere as tabelas no banco
     for tabela_nome in TABLES:
