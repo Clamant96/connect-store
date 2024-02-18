@@ -1,4 +1,5 @@
 from utils import uploadImagemRepositorio
+from flask import send_from_directory
 
 
 def uploadImagem(file, pasta: str):
@@ -8,3 +9,8 @@ def uploadImagem(file, pasta: str):
         return retorno
     else:
         return None
+
+def renderImagem(pasta: str, nomeArquivo: str):
+    print('PASTA: ', pasta)
+    print('NOME: ', nomeArquivo)
+    return send_from_directory(f'uploads\\{pasta}', nomeArquivo)

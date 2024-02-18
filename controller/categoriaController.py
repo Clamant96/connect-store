@@ -2,7 +2,7 @@ from connectStore import app
 from repository.categoriaRepository import *
 from flask import jsonify, request
 from utils import validaToken
-from repository.upload import uploadImagem
+from repository.upload import uploadImagem, renderImagem
 
 @app.route('/categoria/', methods=['GET'])
 def getAllCategoria():
@@ -210,3 +210,8 @@ def postUploadImagem() -> str | None:
         return 'Ocorreu um erro ao tentar salvar o aquivo no repositorio.'
     else:
         return 'Acesso nao autorizado'
+
+@app.route('/categoria/render/<pasta>/<nome>', methods=['GET'])
+def renderImageByName(pasta, nome) -> str | None:
+
+    return renderImagem(pasta, nome)
