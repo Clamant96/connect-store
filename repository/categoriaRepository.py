@@ -5,7 +5,7 @@ from models.categoria import *
 from utils import converteDictEmJsonAll
 from connectStore import findByIdConsole
 from repository.jogoRepository import findByIdJogo
-from flask import Response
+from repository.upload import deletaImagem
 
 import json
 
@@ -667,6 +667,7 @@ def deleteByIdCategoria(id: int) -> str:
 
 
 def deleteByIdCategoriaObj(id: int) -> str:
+    categoria = findByIdCategoria(id)
     if findByIdCategoria(id) != None:
 
         print('deleteByIdCategoriaObj()')
@@ -677,6 +678,9 @@ def deleteByIdCategoriaObj(id: int) -> str:
 
         if deleteJogosByIdCategoria(id) != '':
             print(f'Jogos excluidos da categoria: {id}')
+
+        if deletaImagem('categorias', categoria['img']) != "":
+            print(f'Imagem excluida com sucesso: {categoria['img']}')
 
         con = acessando_base()  # faz a conexao com o banco
         query = "DELETE FROM connect_store.categoria WHERE id = {};".format(id)  # faz monta q query

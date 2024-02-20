@@ -37,6 +37,35 @@ def acessando_base():
 
     except Error as e:
         print("Ocorreu um erro ao tentar se conectar ao banco de dados MySQL: ERRO [{}]".format(e))
+        print("Vou tentar abrir a conexao novamente")
+
+        if connection.is_connected():
+            connection.close()
+            connection.cursor().close()
+
+        else:
+            print("nao existe conexao ativa para essa instancia DB")
+            print("connection")
+            print(connection.execute("SHOW PROCESSLIST"))
+            print("cursor()")
+            print(connection.cursor().execute("SHOW PROCESSLIST"))
+
+        try:
+            connection = mysql.connector.connect(host='localhost',
+                                                 database='connect_store',
+                                                 user='kneri',
+                                                 password='123456')
+
+            if connection.is_connected():
+                db_Info = connection.get_server_info()
+                # print("Connected to MySQL Server version ", db_Info)
+                cursor = connection.cursor()
+                cursor.execute("select database();")
+                record = cursor.fetchone()
+                # print("Conectado no banco: ", record)
+
+        except Error as e:
+            print("Ocorreu um erro ao tentar se conectar ao banco de dados MySQL: ERRO [{}]".format(e))
 
     return connection
 

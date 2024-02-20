@@ -10,7 +10,10 @@ def getAllJogos():
     if data:
 
         if validaToken(data):
-            return jsonify(findAllJogo())
+            try:
+                return jsonify(findAllJogo())
+            except:
+                return None
 
         return None
 
