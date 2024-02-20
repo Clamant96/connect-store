@@ -194,6 +194,36 @@ def postCategoriaObj():
 
     return 'Acesso nao autorizado'
 
+@app.route('/categoria/atualizar-categoria-obj', methods=['PUT'])
+def putCategoriaObj():
+    data = request.get_json(silent=True)
+
+    print('DATA putCategoriaObj(): ', data)
+
+    token = request.headers.get('Authorization')
+
+    if token:
+
+        if validaToken(token):
+            return putCategoriaObjCompleto(data)
+
+        return None
+
+    return 'Acesso nao autorizado'
+
+@app.route('/categoria/deletar-categoria-obj/<int:id>', methods=['DELETE'])
+def deletarCategoriaObj(id):
+    token = request.headers.get('Authorization')
+
+    if token:
+
+        if validaToken(token):
+            return deleteByIdCategoriaObj(id)
+
+        return None
+
+    return 'Acesso nao autorizado'
+
 @app.route('/categoria/upload', methods=['POST'])
 def postUploadImagem() -> str | None:
     token = request.headers.get('Authorization')

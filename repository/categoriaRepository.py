@@ -9,6 +9,7 @@ from flask import Response
 
 import json
 
+
 def findAllCategoria() -> list[dict[Any, Any]]:
     con = acessando_base()  # faz a conexao com o banco
     # query = "SELECT * FROM categoria;"  # faz monta q query
@@ -41,9 +42,9 @@ def findAllCategoria() -> list[dict[Any, Any]]:
     else:
         return None
 
-def findByIdCategoria(id: int) -> Categoria|None:
 
-    con = acessando_base() # faz a conexao com o banco
+def findByIdCategoria(id: int) -> Categoria | None:
+    con = acessando_base()  # faz a conexao com o banco
     # query = "SELECT * FROM categoria WHERE id = {}".format(id)  # faz monta q query
     query = '''
         SELECT
@@ -60,9 +61,9 @@ def findByIdCategoria(id: int) -> Categoria|None:
             WHERE c.id = {};
     '''.format(id)
     cursor = con.cursor()
-    cursor.execute(query) # faz a busca no banco
+    cursor.execute(query)  # faz a busca no banco
 
-    result = converteDictEmJsonAll(cursor) # faz a busca no banco e formata o retorno e retorna somente 1 dado
+    result = converteDictEmJsonAll(cursor)  # faz a busca no banco e formata o retorno e retorna somente 1 dado
 
     if con.is_connected():
         con.close()
@@ -73,9 +74,9 @@ def findByIdCategoria(id: int) -> Categoria|None:
     else:
         return None
 
-def findByIdCategoriaLimit1() -> Categoria|None:
 
-    con = acessando_base() # faz a conexao com o banco
+def findByIdCategoriaLimit1() -> Categoria | None:
+    con = acessando_base()  # faz a conexao com o banco
     query = '''
         SELECT
           JSON_PRETTY(
@@ -85,9 +86,9 @@ def findByIdCategoriaLimit1() -> Categoria|None:
         ORDER BY c.id DESC limit 1;
     '''
     cursor = con.cursor()
-    cursor.execute(query) # faz a busca no banco
+    cursor.execute(query)  # faz a busca no banco
 
-    result = converteDictEmJsonAll(cursor) # faz a busca no banco e formata o retorno e retorna somente 1 dado
+    result = converteDictEmJsonAll(cursor)  # faz a busca no banco e formata o retorno e retorna somente 1 dado
 
     if con.is_connected():
         con.close()
@@ -98,14 +99,14 @@ def findByIdCategoriaLimit1() -> Categoria|None:
     else:
         return None
 
-def findByNomeCategoria(nome: str) -> Categoria|None:
 
-    con = acessando_base() # faz a conexao com o banco
+def findByNomeCategoria(nome: str) -> Categoria | None:
+    con = acessando_base()  # faz a conexao com o banco
     query = "SELECT * FROM categoria WHERE nome = '{}'".format(nome)  # faz monta q query
     cursor = con.cursor()
-    cursor.execute(query) # faz a busca no banco
+    cursor.execute(query)  # faz a busca no banco
 
-    result = converteDictEmJsonAll(cursor) # faz a busca no banco e formata o retorno e retorna somente 1 dado
+    result = converteDictEmJsonAll(cursor)  # faz a busca no banco e formata o retorno e retorna somente 1 dado
 
     if con.is_connected():
         con.close()
@@ -116,9 +117,9 @@ def findByNomeCategoria(nome: str) -> Categoria|None:
     else:
         return None
 
-def findAllJogosComSeusConsolesEUsuarioCategoria() -> Categoria|None:
 
-    con = acessando_base() # faz a conexao com o banco
+def findAllJogosComSeusConsolesEUsuarioCategoria() -> Categoria | None:
+    con = acessando_base()  # faz a conexao com o banco
     # query = "SELECT * FROM categoria WHERE id = {}".format(id)  # faz monta q query
     query = '''
         SELECT 
@@ -159,9 +160,9 @@ def findAllJogosComSeusConsolesEUsuarioCategoria() -> Categoria|None:
                 GROUP BY cc.categoria_id) csn ON csn.categoria_id = c.id;
     '''
     cursor = con.cursor()
-    cursor.execute(query) # faz a busca no banco
+    cursor.execute(query)  # faz a busca no banco
 
-    result = converteDictEmJsonAll(cursor) # faz a busca no banco e formata o retorno e retorna somente 1 dado
+    result = converteDictEmJsonAll(cursor)  # faz a busca no banco e formata o retorno e retorna somente 1 dado
 
     print('conexao ativa? ', con.is_connected())
 
@@ -237,9 +238,9 @@ def findAllJogosComSeusConsolesEUsuarioCategoriaManyToManyJogos() -> Categoria |
     else:
         return None
 
-def findAllJogosCategoriaById(id: int) -> Categoria|None:
 
-    con = acessando_base() # faz a conexao com o banco
+def findAllJogosCategoriaById(id: int) -> Categoria | None:
+    con = acessando_base()  # faz a conexao com o banco
     # query = "SELECT * FROM categoria WHERE id = {}".format(id)  # faz monta q query
     query = '''
         SELECT 
@@ -281,9 +282,9 @@ def findAllJogosCategoriaById(id: int) -> Categoria|None:
             WHERE c.id = {};
     '''.format(id)
     cursor = con.cursor()
-    cursor.execute(query) # faz a busca no banco
+    cursor.execute(query)  # faz a busca no banco
 
-    result = converteDictEmJsonAll(cursor) # faz a busca no banco e formata o retorno e retorna somente 1 dado
+    result = converteDictEmJsonAll(cursor)  # faz a busca no banco e formata o retorno e retorna somente 1 dado
 
     if con.is_connected():
         con.close()
@@ -357,9 +358,9 @@ def findAllJogosComSeusConsolesEUsuarioCategoriaByIdManyToManyJogos(id: int) -> 
     else:
         return None
 
-def findAllJogosCategoriaByUri(uri: str) -> Categoria|None:
 
-    con = acessando_base() # faz a conexao com o banco
+def findAllJogosCategoriaByUri(uri: str) -> Categoria | None:
+    con = acessando_base()  # faz a conexao com o banco
     # query = "SELECT * FROM categoria WHERE id = {}".format(id)  # faz monta q query
     query = '''
         SELECT 
@@ -401,9 +402,9 @@ def findAllJogosCategoriaByUri(uri: str) -> Categoria|None:
             WHERE c.uri = '{}';
     '''.format(uri)
     cursor = con.cursor()
-    cursor.execute(query) # faz a busca no banco
+    cursor.execute(query)  # faz a busca no banco
 
-    result = converteDictEmJsonAll(cursor) # faz a busca no banco e formata o retorno e retorna somente 1 dado
+    result = converteDictEmJsonAll(cursor)  # faz a busca no banco e formata o retorno e retorna somente 1 dado
 
     if con.is_connected():
         con.close()
@@ -413,6 +414,7 @@ def findAllJogosCategoriaByUri(uri: str) -> Categoria|None:
         return json.loads(result[0]['categorias'])[0]  # retorna somente o objeto JSON
     else:
         return None
+
 
 def findAllJogosComSeusConsolesEUsuarioCategoriaByUriManyToManyJogos(uri: str) -> Categoria | None:
     con = acessando_base()  # faz a conexao com o banco
@@ -476,36 +478,38 @@ def findAllJogosComSeusConsolesEUsuarioCategoriaByUriManyToManyJogos(uri: str) -
     else:
         return None
 
-def postCategoria(categoria: Categoria):
 
+def postCategoria(categoria: Categoria) -> Categoria | str:
     if findByNomeCategoria(categoria['nome']) == None:
-        con = acessando_base() # faz a conexao com o banco
-        query = "INSERT INTO categoria (nome, uri, img, usuario_id) VALUES ('{}', '{}', '{}', {});".format(categoria['nome'], categoria['uri'], categoria['img'], categoria['usuario_id'])  # faz monta q query
+        con = acessando_base()  # faz a conexao com o banco
+        query = "INSERT INTO categoria (nome, uri, img, usuario_id) VALUES ('{}', '{}', '{}', {});".format(
+            categoria['nome'], categoria['uri'], categoria['img'], categoria['usuario_id'])  # faz monta q query
         cursor = con.cursor()
-        result = cursor.execute(query) # faz a busca no banco
-        con.commit() # registrar os dados no banco
+        result = cursor.execute(query)  # faz a busca no banco
+        con.commit()  # registrar os dados no banco
 
         if con.is_connected():
             con.close()
             cursor.close()
 
-        return Response('Categoria cadastrado com sucesso!', status=200)
+        return findByNomeCategoria(categoria['nome'])
 
-    return Response('Categoria ja existe na base.', status=500)
+    return 'Categoria ja existe na base.'
 
-def postCategoriaObjCompleto(categoria: CategoriaRequest):
 
+def postCategoriaObjCompleto(categoria: CategoriaRequest) -> Categoria | str:
     print('postCategoriaObjCompleto(): ', categoria)
 
     categoria['uri'] = str(categoria['uri']).replace(' ', '-')
 
     if findByNomeCategoria(categoria['nome']) == None:
 
-        con = acessando_base() # faz a conexao com o banco
-        query = "INSERT INTO categoria (nome, uri, img, usuario_id) VALUES ('{}', '{}', '{}', {});".format(categoria['nome'], categoria['uri'], categoria['img'], categoria['usuario_id'])  # faz monta q query
+        con = acessando_base()  # faz a conexao com o banco
+        query = "INSERT INTO categoria (nome, uri, img, usuario_id) VALUES ('{}', '{}', '{}', {});".format(
+            categoria['nome'], categoria['uri'], categoria['img'], categoria['usuario_id'])  # faz monta q query
         cursor = con.cursor()
-        result = cursor.execute(query) # faz a busca no banco
-        con.commit() # registrar os dados no banco
+        result = cursor.execute(query)  # faz a busca no banco
+        con.commit()  # registrar os dados no banco
 
         if con.is_connected():
             con.close()
@@ -543,18 +547,19 @@ def postCategoriaObjCompleto(categoria: CategoriaRequest):
                     if categoriaCriada['id']:
                         postJogoEmCategoria(categoriaCriada['id'], jogo['id'])
 
-            return Response('Categoria cadastrado com sucesso!', status=200)
+            return findByNomeCategoria(categoria['nome'])
 
-        return Response('Categoria ja existe na base.', status=500)
+        return 'Categoria ja existe na base.'
+
 
 def postConsoleEmCategoria(idCategoria: int, idConsole: int) -> str:
-
     if findByIdCategoria(idCategoria) != None and findByIdConsole(idConsole) != None:
-        con = acessando_base() # faz a conexao com o banco
-        query = "INSERT INTO connect_store.categoria_console (categoria_id, console_id) VALUES ('{}', {});".format(idCategoria, idConsole)
+        con = acessando_base()  # faz a conexao com o banco
+        query = "INSERT INTO connect_store.categoria_console (categoria_id, console_id) VALUES ('{}', {});".format(
+            idCategoria, idConsole)
         cursor = con.cursor()
-        result = cursor.execute(query) # faz a busca no banco
-        con.commit() # registrar os dados no banco
+        result = cursor.execute(query)  # faz a busca no banco
+        con.commit()  # registrar os dados no banco
 
         if con.is_connected():
             con.close()
@@ -563,15 +568,16 @@ def postConsoleEmCategoria(idCategoria: int, idConsole: int) -> str:
         return 'Associacao realizada com sucesso!'
 
     return 'Nao foi possivel associar os dados.'
+
 
 def postJogoEmCategoria(idCategoria: int, idJogo: int) -> str:
-
     if findByIdCategoria(idCategoria) != None and findByIdJogo(idJogo) != None:
-        con = acessando_base() # faz a conexao com o banco
-        query = "INSERT INTO connect_store.categoria_jogo (categoria_id, jogo_id) VALUES ('{}', {});".format(idCategoria, idJogo)
+        con = acessando_base()  # faz a conexao com o banco
+        query = "INSERT INTO connect_store.categoria_jogo (categoria_id, jogo_id) VALUES ('{}', {});".format(
+            idCategoria, idJogo)
         cursor = con.cursor()
-        result = cursor.execute(query) # faz a busca no banco
-        con.commit() # registrar os dados no banco
+        result = cursor.execute(query)  # faz a busca no banco
+        con.commit()  # registrar os dados no banco
 
         if con.is_connected():
             con.close()
@@ -581,31 +587,74 @@ def postJogoEmCategoria(idCategoria: int, idJogo: int) -> str:
 
     return 'Nao foi possivel associar os dados.'
 
-def putCategoria(categoria: Categoria) -> str:
 
+def putCategoria(categoria: Categoria) -> Categoria | None:
     if findByIdCategoria(categoria['id']) != None:
-        con = acessando_base() # faz a conexao com o banco
-        query = "UPDATE categoria SET nome = '{}', uri = '{}', img = '{}', usuario_id = {} WHERE id = {};".format(categoria['nome'], categoria['uri'], categoria['img'], categoria['usuario_id'], categoria['id'])  # faz monta q query
+        con = acessando_base()  # faz a conexao com o banco
+        query = "UPDATE categoria SET nome = '{}', uri = '{}', img = '{}', usuario_id = {} WHERE id = {};".format(
+            categoria['nome'], categoria['uri'], categoria['img'], categoria['usuario_id'],
+            categoria['id'])  # faz monta q query
         cursor = con.cursor()
-        cursor.execute(query) # faz a busca no banco
-        con.commit() # registrar os dados no banco
+        cursor.execute(query)  # faz a busca no banco
+        con.commit()  # registrar os dados no banco
 
         if con.is_connected():
             con.close()
             cursor.close()
 
-        return 'Console atualizado com sucesso!'
+        return findByIdCategoria(categoria['id'])
 
-    return 'Nao foi localizado essa categoria cadastrado na base.'
+    return None
+
+
+def putCategoriaObjCompleto(categoria: Categoria) -> Categoria | None:
+    if findByIdCategoria(categoria['id']) != None:
+
+        con = acessando_base()  # faz a conexao com o banco
+        query = "UPDATE categoria SET nome = '{}', uri = '{}', img = '{}', usuario_id = {} WHERE id = {};".format(
+            categoria['nome'], categoria['uri'], categoria['img'], categoria['usuario_id'],
+            categoria['id'])  # faz monta q query
+        cursor = con.cursor()
+        cursor.execute(query)  # faz a busca no banco
+        con.commit()  # registrar os dados no banco
+
+        if con.is_connected():
+            con.close()
+            cursor.close()
+
+        if deleteConsolesByIdCategoria(categoria['id']) != None:
+            if categoria['consoles']:
+
+                for console in categoria['consoles']:
+
+                    print('console: ', console)
+
+                    if categoria['id']:
+                        postConsoleEmCategoria(categoria['id'], console['id'])
+
+        if deleteJogosByIdCategoria(categoria['id']) != None:
+
+            if categoria['jogos']:
+
+                for jogo in categoria['jogos']:
+
+                    print('jogo: ', jogo)
+
+                    if categoria['id']:
+                        postJogoEmCategoria(categoria['id'], jogo['id'])
+
+        return findByIdCategoria(categoria['id'])
+
+    return None
+
 
 def deleteByIdCategoria(id: int) -> str:
-
     if findByIdCategoria(id) != None:
-        con = acessando_base() # faz a conexao com o banco
+        con = acessando_base()  # faz a conexao com o banco
         query = "DELETE FROM categoria WHERE id = {};".format(id)  # faz monta q query
 
         cursor = con.cursor()
-        cursor.execute(query) # faz a busca no banco
+        cursor.execute(query)  # faz a busca no banco
         con.commit()  # registrar os dados no banco
 
         if con.is_connected():
@@ -615,3 +664,62 @@ def deleteByIdCategoria(id: int) -> str:
         return 'Categoria deletada com sucesso!'
 
     return 'Nao foi possivel excluir a categoria da base, pois ele nao foi localizado.'
+
+
+def deleteByIdCategoriaObj(id: int) -> str:
+    if findByIdCategoria(id) != None:
+
+        print('deleteByIdCategoriaObj()')
+
+        # DEVIDO AOS RELACIONAMENTOS DAS TANELAS, TEMOS QUE DELETAR ELES ANTES DE DELETAR O OBJETO PRINCIPAL
+        if deleteConsolesByIdCategoria(id) != '':
+            print(f'Consoles excluidos da categoria: {id}')
+
+        if deleteJogosByIdCategoria(id) != '':
+            print(f'Jogos excluidos da categoria: {id}')
+
+        con = acessando_base()  # faz a conexao com o banco
+        query = "DELETE FROM connect_store.categoria WHERE id = {};".format(id)  # faz monta q query
+
+        cursor = con.cursor()
+        cursor.execute(query)  # faz a busca no banco
+        con.commit()  # registrar os dados no banco
+
+        if con.is_connected():
+            con.close()
+            cursor.close()
+
+        return 'Categoria deletada com sucesso!'
+
+    return 'Nao foi possivel excluir a categoria da base, pois ele nao foi localizado.'
+
+
+def deleteJogosByIdCategoria(id: int) -> str:
+    con = acessando_base()  # faz a conexao com o banco
+    query = "DELETE FROM connect_store.categoria_jogo AS cj WHERE cj.categoria_id = {};".format(id)  # faz monta q query
+
+    cursor = con.cursor()
+    cursor.execute(query)  # faz a busca no banco
+    con.commit()  # registrar os dados no banco
+
+    if con.is_connected():
+        con.close()
+        cursor.close()
+
+    return 'Jogos removidos da categoria com sucesso!'
+
+
+def deleteConsolesByIdCategoria(id: int) -> str:
+    con = acessando_base()  # faz a conexao com o banco
+    query = "DELETE FROM connect_store.categoria_console AS cj WHERE cj.categoria_id = {};".format(
+        id)  # faz monta q query
+
+    cursor = con.cursor()
+    cursor.execute(query)  # faz a busca no banco
+    con.commit()  # registrar os dados no banco
+
+    if con.is_connected():
+        con.close()
+        cursor.close()
+
+    return 'Consoles removidos da categoria com sucesso!'
