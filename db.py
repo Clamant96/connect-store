@@ -45,10 +45,6 @@ def acessando_base():
 
         else:
             print("nao existe conexao ativa para essa instancia DB")
-            print("connection")
-            print(connection.execute("SHOW PROCESSLIST"))
-            print("cursor()")
-            print(connection.cursor().execute("SHOW PROCESSLIST"))
 
         try:
             connection = mysql.connector.connect(host='localhost',

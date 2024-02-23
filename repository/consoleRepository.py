@@ -43,7 +43,7 @@ def findByIdConsole(id: int) -> Console|None:
     query = '''
         SELECT
           JSON_PRETTY(
-              JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'usuarios', s.usuarios))) AS consoles
+              JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'nome', c.nome, 'icone', c.icone, 'usuarios', s.usuarios))) AS consoles
             FROM
                 connect_store.console c
             left join (
@@ -86,7 +86,7 @@ def findByNomeConsole(nome: str) -> Console|None:
     else:
         return None
 
-def postConsole(console: Console) -> str:
+def postConsole(console: Console):
 
     if findByNomeConsole(console['nome']) == None:
         con = acessando_base() # faz a conexao com o banco
@@ -99,11 +99,11 @@ def postConsole(console: Console) -> str:
             con.close()
             cursor.close()
 
-        return 'Console cadastrado com sucesso!'
+        return findByNomeConsole(console['nome'])
 
     return 'Console ja existe na base.'
 
-def putConsole(console: Console) -> str:
+def putConsole(console: Console):
 
     print(findByIdConsole(console['id']))
 
@@ -118,13 +118,18 @@ def putConsole(console: Console) -> str:
             con.close()
             cursor.close()
 
-        return 'Console atualizado com sucesso!'
+        return findByIdConsole(console['id'])
 
     return 'Nao foi localizado esse console cadastrado na base.'
 
 def deleteByIdConsole(id: int) -> str:
 
     if findByIdConsole(id) != None:
+
+        # DEVIDO AOS RELACIONAMENTOS DAS TANELAS, TEMOS QUE DELETAR ELES ANTES DE DELETAR O OBJETO PRINCIPAL
+        if deleteConsolesByIdCategoria(id) != '':
+            print(f'Consoles excluidos com sucesso da tabela auxiliar.')
+
         con = acessando_base() # faz a conexao com o banco
         query = "DELETE FROM console WHERE id = {};".format(id)  # faz monta q query
 
@@ -139,3 +144,17 @@ def deleteByIdConsole(id: int) -> str:
         return 'Console deletado com sucesso!'
 
     return 'Nao foi possivel excluir o console da base, pois ele nao foi localizado.'
+
+def deleteConsolesByIdCategoria(id: int) -> str:
+    con = acessando_base()  # faz a conexao com o banco
+    query = "DELETE FROM connect_store.categoria_console AS cj WHERE cj.console_id = {};".format(id)  # faz monta q query
+
+    cursor = con.cursor()
+    cursor.execute(query)  # faz a busca no banco
+    con.commit()  # registrar os dados no banco
+
+    if con.is_connected():
+        con.close()
+        cursor.close()
+
+    return 'Consoles removidos da categoria com sucesso!'
