@@ -2,7 +2,7 @@ from connectStore import app
 from repository.jogoRepository import *
 from flask import jsonify, request
 
-from repository.upload import uploadImagem
+from repository.upload import uploadImagem, renderImagem
 from utils import validaToken
 
 @app.route('/jogo/', methods=['GET'])
@@ -118,3 +118,8 @@ def postUploadImagemJogo() -> str | None:
         return 'Ocorreu um erro ao tentar salvar o aquivo no repositorio.'
     else:
         return 'Acesso nao autorizado'
+
+@app.route('/jogo/render/<pasta>/<nome>', methods=['GET'])
+def renderImageJogoByName(pasta, nome) -> str | None:
+
+    return renderImagem(pasta, nome)
