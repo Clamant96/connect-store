@@ -170,6 +170,71 @@ def postJogo(jogo: Jogo) -> str:
 
     return 'Jogo ja existe na base.'
 
+def postJogoObjCompleto(jogo: JogoRequest) -> Jogo | str:
+    print('postJogoObjCompleto(): ', jogo)
+
+    if findByNomeJogo(jogo['nome']) == None:
+
+        con = acessando_base()  # faz a conexao com o banco
+        query = ("INSERT INTO jogo (nome, img, preco, desconto, usuario_id) VALUES ('{}', '{}', '{}', {}, {});"
+                 .format(jogo['nome'], jogo['img'], jogo['preco'], jogo['desconto'], jogo['usuario_id']))  # faz monta q query
+        cursor = con.cursor()
+        result = cursor.execute(query)  # faz a busca no banco
+        con.commit()  # registrar os dados no banco
+
+        if con.is_connected():
+            con.close()
+            cursor.close()
+
+        jogoCriado = findByIdJogoLimit1()
+
+        print('jogoCriado: ', jogoCriado)
+
+        print('jogoCriado NOME: ', jogoCriado['nome'])
+        print('jogo NOME: ', jogo['nome'])
+
+        if jogoCriado['nome'] == jogo['nome']:
+            print('JOGO CADASTRADO E LOCALIZADO, AGORA SERA FEIRA A ASSOCIACAO MANY-TO-MANY')
+
+            if jogo['consoles']:
+
+                print('jogo CONSOLES', jogo['consoles'])
+
+                for console in jogo['consoles']:
+
+                    print('console: ', console)
+
+                    if jogoCriado['id']:
+                        postConsoleEmJogo(jogoCriado['id'], console['id'])
+
+            return findByNomeJogo(jogo['nome'])
+
+        return 'Jogo ja existe na base.'
+
+def findByIdJogoLimit1() -> Jogo | None:
+    con = acessando_base()  # faz a conexao com o banco
+    query = '''
+        SELECT
+          JSON_PRETTY(
+              JSON_OBJECT('id', j.id, 'nome', j.nome, 'img', j.img)) AS jogos
+            FROM
+                connect_store.jogo j
+        ORDER BY j.id DESC limit 1;
+    '''
+    cursor = con.cursor()
+    cursor.execute(query)  # faz a busca no banco
+
+    result = converteDictEmJsonAll(cursor)  # faz a busca no banco e formata o retorno e retorna somente 1 dado
+
+    if con.is_connected():
+        con.close()
+        cursor.close()
+
+    if result[0]['jogos'] != None:
+        return json.loads(result[0]['jogos'])  # retorna somente o objeto JSON
+    else:
+        return None
+
 def postConsoleEmJogo(idJogo: int, idConsole: int) -> str:
 
     if findByIdJogo(idJogo) != None and findByIdConsole(idConsole) != None:

@@ -1,6 +1,8 @@
 from connectStore import app
 from repository.jogoRepository import *
 from flask import jsonify, request
+
+from repository.upload import uploadImagem
 from utils import validaToken
 
 @app.route('/jogo/', methods=['GET'])
@@ -53,7 +55,8 @@ def criarJogos():
     if token:
 
         if validaToken(token):
-            return postJogo(data)
+            # return postJogo(data)
+            return postJogoObjCompleto(data)
 
         return None
 
@@ -98,3 +101,20 @@ def postAssociaConsoleEmJogo(idJogo, idConsole):
         return None
 
     return 'Acesso nao autorizado'
+
+@app.route('/jogo/upload', methods=['POST'])
+def postUploadImagemJogo() -> str | None:
+    token = request.headers.get('Authorization')
+
+    if token:
+
+        if validaToken(token):
+
+            retorno = uploadImagem(request.files['file'], 'jogos')
+
+            if validaToken(token) and retorno is not None:
+                return retorno
+
+        return 'Ocorreu um erro ao tentar salvar o aquivo no repositorio.'
+    else:
+        return 'Acesso nao autorizado'
